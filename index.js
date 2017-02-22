@@ -12,36 +12,36 @@ export default postcss.plugin('postcss-interpolate', (options = {}) => {
 
               if (interpolateArray.length > 3){
 
-                var direction          = interpolateArray[0];
-                var mediaqueries       = [];
-                var values             = [];
-                var firstValueIsString = isNaN(parseInt(direction, 10));
+                var firstValueIsString = isNaN(parseInt(interpolateArray[0], 10));
                 var valuesNumberIsOdd  = (interpolateArray.length & 1);
-                var n;
-
+                var startFrom = 0;
 
                 // Shorthand, without direction
                 if (valuesNumberIsOdd == false && firstValueIsString == false){
                   var directionViewport = 'vw';
-                  n = 0;
                 }
 
-                // with direction
+                // With direction
                 if (valuesNumberIsOdd == true && firstValueIsString == true){
+                  var direction          = interpolateArray[0];
+
                   if (direction == 'horizontally') {
                     var directionViewport = 'vw';
                   } else if (direction == 'vertically') {
                     var directionViewport = 'vh';
                   }
-                  n = 1;
+                  startFrom = 1;
                 }
 
                 if ((valuesNumberIsOdd == true && firstValueIsString == false) || (valuesNumberIsOdd == false && firstValueIsString == true)){
                   console.log('нечетное и число или четное и не число')
                 }
 
+                var mediaqueries = [];
+                var values = [];
+
                 // Get array of mediaqueries and array of values
-                for (var i = n; i < interpolateArray.length; i+=2) {
+                for (var i = startFrom; i < interpolateArray.length; i+=2) {
                   mediaqueries.push(interpolateArray[i]);
                   values.push(interpolateArray[i+1]);
                 }
@@ -84,7 +84,7 @@ export default postcss.plugin('postcss-interpolate', (options = {}) => {
                   }
 
                   // Insert first value
-                  decl.replaceWith({ prop: decl.prop, value: interpolateArray[n+1]});
+                  decl.replaceWith({ prop: decl.prop, value: interpolateArray[startFrom+1]});
                 }
 
           }
