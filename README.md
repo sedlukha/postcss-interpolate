@@ -18,27 +18,24 @@
 /* Output */
 
 .foo {
-  font-size:  14px;
+  font-size: 14px;
 }
 
-@media screen and (min-width:  600px) {
-
+@media screen and (min-width: 600px) {
     .foo {
-        font-size: calc( 16px + 4 * (100vw -  600px) / 1200 - 600);
+        font-size: calc( 16px + 4 * (100vw - 600px) / 1200 - 600);
     }
 }
 
-@media screen and (min-width:  320px) {
-
+@media screen and (min-width: 320px) {
     .foo {
-        font-size: calc( 14px + 2 * (100vw -  320px) / 600 - 320);
+        font-size: calc( 14px + 2 * (100vw - 320px) / 600 - 320);
     }
 }
 
-@media screen and (min-width:  1200px) {
-
+@media screen and (min-width: 1200px) {
     .foo {
-        font-size:  20px;
+        font-size: 20px;
     }
 }
 ```
