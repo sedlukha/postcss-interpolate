@@ -1,6 +1,6 @@
-import * as postcss from 'postcss';
+var postcss = require('postcss');
 
-export default postcss.plugin('postcss-interpolate', (options = {}) => {
+module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
     return css => {
         css.walkDecls(decl => {
 
