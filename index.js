@@ -1,6 +1,6 @@
 var postcss = require('postcss');
 
-module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
+module.exports =  postcss.plugin('postcss-interpolate', (options = {}) => {
     return css => {
         css.walkDecls(decl => {
 
@@ -74,7 +74,7 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
                       media.append({selector: decl.parent.selector}).walkRules(function(selector){
                         selector.append({
                           prop: decl.prop,
-                          value: 'calc(' + values[i] + ' + ' + (parseInt(values[i+1], 10) - parseInt(values[i], 10)) + ' * (100' + directionViewport + ' - ' + mediaqueries[i] + ') / ' +  parseInt(mediaqueries[i+1], 10) + ' - ' +  parseInt(mediaqueries[i], 10) +')'
+                          value: 'calc(' + values[i] + ' + ' + (parseInt(values[i+1], 10) - parseInt(values[i], 10)) + ' * (100' + directionViewport + ' - ' + mediaqueries[i] + ') / ' +  (parseInt(mediaqueries[i+1], 10) - parseInt(mediaqueries[i], 10))  +')'
                         });
                       });
 
