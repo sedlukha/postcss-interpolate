@@ -7,87 +7,104 @@ module.exports =  postcss.plugin('postcss-interpolate', (options = {}) => {
           // Get property
           if (decl.value.indexOf( 'interpolate(' ) !== -1) {
 
-              // Get array of values
-              var interpolateArray = decl.value.match(/\(([^)]+)\)/)[1].split(',');
+            // Get array of interolate() values
+            const interpolateArray = decl.value.match(/\(([^)]+)\)/)[1].split(',');
 
-              if (interpolateArray.length > 3){
+            if (interpolateArray.length > 3){
+              var firstValueIsString = isNaN(parseInt(interpolateArray[0], 10));
+              var valuesNumberIsOdd  = (interpolateArray.length & 1);
+              var startFrom = 0;
 
-                var firstValueIsString = isNaN(parseInt(interpolateArray[0], 10));
-                var valuesNumberIsOdd  = (interpolateArray.length & 1);
-                var startFrom = 0;
+              // Shorthand, without direction
+              if (valuesNumberIsOdd == false && firstValueIsString == false){
+                var directionViewport = 'vw';
 
-                // Shorthand, without direction
-                if (valuesNumberIsOdd == false && firstValueIsString == false){
+                generate(0)
+              }
+
+              else if (valuesNumberIsOdd == true && firstValueIsString == true){
+                var direction = interpolateArray[0];
+
+                if (direction == 'horizontally') {
                   var directionViewport = 'vw';
                 }
 
-                // With direction
-                if (valuesNumberIsOdd == true && firstValueIsString == true){
-                  var direction          = interpolateArray[0];
-
-                  if (direction == 'horizontally') {
-                    var directionViewport = 'vw';
-                  } else if (direction == 'vertically') {
-                    var directionViewport = 'vh';
-                  }
-                  startFrom = 1;
+                else if (direction == 'vertically') {
+                  var directionViewport = 'vh';
                 }
 
-                if ((valuesNumberIsOdd == true && firstValueIsString == false) || (valuesNumberIsOdd == false && firstValueIsString == true)){
-                  console.log('нечетное и число или четное и не число')
+                else {
+                  // WARN
                 }
 
-                var mediaqueries = [];
-                var values = [];
+                generate(1);
+              }
+
+              else {
+                // WARN
+              }
+
+              function generate(startfrom){
+                var mediaqueriesArray = [];
+                var valuesArray = [];
+
+                const rule = decl.parent;
+                const root = rule.parent;
 
                 // Get array of mediaqueries and array of values
                 for (var i = startFrom; i < interpolateArray.length; i+=2) {
-                  mediaqueries.push(interpolateArray[i]);
-                  values.push(interpolateArray[i+1]);
+                  mediaqueriesArray.push(interpolateArray[i]);
+                  valuesArray.push(interpolateArray[i+1]);
                 }
 
-                  // Last mediaquery rule
-                  var lastMedia = postcss.atRule({
-                    name: 'media',
-                    params: 'screen and (min-width: ' + mediaqueries[mediaqueries.length - 1] +')'
-                  })
+                var remDivider =  1;
 
-                  lastMedia.append({selector: decl.parent.selector}).walkRules(function(selector){
-                    selector.append({
-                      prop: decl.prop,
-                      value: values[values.length - 1]
-                    });
-                  });
+                // Firsl value rule
+                decl.replaceWith({ prop: decl.prop, value: interpolateArray[startFrom+1]});
 
-                  // Insert last mediaquery
-                  decl.parent.parent.insertAfter(decl.parent, lastMedia)
+                // Middle mediaquery rule
+                for (var i = 0; i < mediaqueriesArray.length - 1; i++) {
+                  for (var i = 0; i < valuesArray.length - 1; i++) {
 
-                  // Middle mediaquery rule
-                  for (var i = 0; i < mediaqueries.length - 1; i++) {
-                    for (var i = 0; i < values.length - 1; i++) {
-
+                    function middleMedia(){
                       var media = postcss.atRule({
                         name: 'media',
-                        params: 'screen and (min-width: ' + mediaqueries[i] +')'
+                        params: 'screen and (min-width: ' + mediaqueriesArray[i] +')'
                       })
 
-                      media.append({selector: decl.parent.selector}).walkRules(function(selector){
+                      media.append({selector: rule.selector}).walkRules(function(selector){
                         selector.append({
                           prop: decl.prop,
-                          value: 'calc(' + values[i] + ' + ' + (parseInt(values[i+1], 10) - parseInt(values[i], 10)) + ' * (100' + directionViewport + ' - ' + mediaqueries[i] + ') / ' +  (parseInt(mediaqueries[i+1], 10) - parseInt(mediaqueries[i], 10))  +')'
+                          value: 'calc(' + valuesArray[i] + ' + ' + (parseInt(valuesArray[i+1], 10) - parseInt(valuesArray[i], 10)) + ' * (100' + directionViewport + ' - ' + mediaqueriesArray[i] + ') / ' +  ((parseInt(mediaqueriesArray[i+1], 10) - parseInt(mediaqueriesArray[i], 10)) ) +')'
                         });
                       });
 
                       // Insert middle mediaquery
-                      decl.parent.parent.insertAfter(decl.parent, media)
+                      root.insertAfter(root.last, media)
                     }
-                  }
 
-                  // Insert first value
-                  decl.replaceWith({ prop: decl.prop, value: interpolateArray[startFrom+1]});
+                    middleMedia()
+                  }
                 }
 
+                //Last mediaquery rule
+                var lastMedia = postcss.atRule({
+                  name: 'media',
+                  params: 'screen and (min-width: ' + mediaqueriesArray[mediaqueriesArray.length - 1] +')'
+                })
+
+                lastMedia.append({selector: rule.selector}).walkRules(function(selector){
+                  selector.append({
+                    prop: decl.prop,
+                    value: valuesArray[valuesArray.length - 1]
+                  });
+                });
+
+                // Insert last mediaquery
+                root.insertAfter(root.last, lastMedia);
+              }
+            }
           }
-        });
+      });
     };
 });
