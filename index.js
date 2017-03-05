@@ -1,189 +1,224 @@
 var postcss = require('postcss');
 
-module.exports =  postcss.plugin('postcss-interpolate', (options = {}) => {
+module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
     return css => {
 
-        var rootInterpolateArray;
-        css.walkDecls(decl =>{
-          if ((decl.parent.selector.indexOf('html') > -1) && (decl.prop.indexOf('font-size') > -1) && (decl.value.indexOf( 'interpolate(' ) !== -1)){
-            rootInterpolateArray = decl.value;
+        // Html font-size value
+        var rootString;
+
+        // Get 'rootString' value
+        css.walkDecls(decl => {
+          if ((decl.parent.selector.indexOf('html') > -1) &&
+            (decl.prop.indexOf('font-size') > -1)) {
+            rootString = decl.value;
             return
           }
-        })
+        });
 
         css.walkDecls(decl => {
 
-          // Get property
-          if (decl.value.indexOf( 'interpolate(' ) !== -1) {
+          // Get property line
+          if (decl.value.indexOf('interpolate(') !== -1) {
 
             // Get array of interolate() values
             const interpolateArray = decl.value.match(/\(([^)]+)\)/)[1].split(',');
 
-            if (interpolateArray.length > 3){
-              var firstValueIsString = isNaN(parseInt(interpolateArray[0], 10));
-              var valuesNumberIsOdd  = (interpolateArray.length & 1);
-              var startFrom = 0;
+            if (interpolateArray.length > 3) {
 
-              // Shorthand, without direction
-              if (valuesNumberIsOdd == false && firstValueIsString == false){
-                var directionViewport = 'vw';
-
-                generateArrays(0)
+              function isString(array){
+                return isNaN(parseFloat(array))
               }
 
-              else if (valuesNumberIsOdd == true && firstValueIsString == true){
-                var direction = interpolateArray[0];
+              function isOdd(array){
+                return (array.length & 1)
+              }
 
-                if (direction == 'horizontally') {
-                  var directionViewport = 'vw';
+              var startFrom, directionViewport;
+
+              function checkDirection(arrayForCheck){
+
+                if (isOdd(arrayForCheck) == false && isString(arrayForCheck[0]) == false) {
+                  directionViewport = 'vw';
+                  startFrom = 0
                 }
 
-                else if (direction == 'vertically') {
-                  var directionViewport = 'vh';
+                // With direction
+                else if (isOdd(arrayForCheck) == true && isString(arrayForCheck[0]) == true) {
+
+                  var direction = arrayForCheck[0];
+
+                  if (direction == 'horizontally') {
+                    directionViewport = 'vw';
+                  } else if (direction == 'vertically') {
+                    directionViewport = 'vh';
+                  } else {
+                    // WARN
+                  }
+                  startFrom = 1;
                 }
 
+                // Syntax error
                 else {
                   // WARN
                 }
-                startFrom = 1;
-                generateArrays(1);
+
+                return
               }
 
-              else {
-                // WARN
+              var mediaArray = [];
+              var valueArray = [];
+              const rule = decl.parent;
+              const root = rule.parent;
+
+              // Generate media and values arrays
+              function generateArrays() {
+                checkDirection(interpolateArray)
+
+                for (var i = startFrom; i < interpolateArray.length; i += 2) {
+                  mediaArray.push(interpolateArray[i]);
+                  valueArray.push(interpolateArray[i + 1]);
+                }
+                return
               }
 
+              // Get html font-size value
+              function getHtmlValue(actualViewport) {
+                actualViewport = parseFloat(actualViewport)
 
-
-              function generateArrays(startfrom){
-                var mediaqueriesArray = [];
-                var valuesArray = [];
-
-                const rule = decl.parent;
-                const root = rule.parent;
-
-                // Get array of mediaqueries and array of values
-                for (var i = startFrom; i < interpolateArray.length; i+=2) {
-                  mediaqueriesArray.push(interpolateArray[i]);
-                  valuesArray.push(interpolateArray[i+1]);
+                function isPx(i) {
+                  return i.indexOf('px') > -1
                 }
 
+                function isRem(i) {
+                  return i.indexOf('rem') > -1
+                }
 
-                function checkArrays(){
-                  function isPx(i){
-                    return i.indexOf('px') > -1
-                  }
+                if (mediaArray.every(isPx) && valueArray.every(isPx)) {
+                  return 1;
+                }
 
-                  function isRem(i){
-                    return i.indexOf('rem') > -1
-                  }
+                else if (mediaArray.every(isPx) && valueArray.every(isRem)) {
+                  var rootMediaArray = [];
+                  var rootValueArray = [];
+                  var bigger = [];
+                  var rootReadyArray;
 
-                  function getDivider(actualViewport){
-                    actualViewport = parseFloat(actualViewport)
+                  if (rootString.indexOf('interpolate(') > -1) {
+                    rootReadyArray = rootString.match(/\(([^)]+)\)/)[1].split(',');
 
-                   if (mediaqueriesArray.every(isPx) && valuesArray.every(isPx)) {
-                     return 1;
-                   }
+                    checkDirection(rootReadyArray)
 
-                   else if (mediaqueriesArray.every(isPx) && valuesArray.every(isRem)) {
-                     var rootMedia = [];
-                     var rootValue = [];
-                     var bigger = [];
-                     var rootReadyArray;
+                    // Get array of mediaqueries and array of values
+                    for (var i = startFrom; i < rootReadyArray.length; i += 2) {
+                      rootMediaArray.push(rootReadyArray[i]);
+                      rootValueArray.push(rootReadyArray[i + 1]);
+                    }
 
-                     if(rootInterpolateArray.indexOf('interpolate(') > -1 ){
-                       rootReadyArray = rootInterpolateArray.match(/\(([^)]+)\)/)[1].split(',');
+                    var minrootMediaArray, maxrootMediaArray, minrootValueArray, maxrootValueArray;
 
-                       // Get array of mediaqueries and array of values
-                       for (var i = startFrom; i < rootReadyArray.length; i+=2) {
-                         rootMedia.push(rootReadyArray[i]);
-                         rootValue.push(rootReadyArray[i+1]);
-                       }
-
-
-                       var minRootMedia, maxRootMedia, minRootValue, maxRootValue;
-
-                       for (var i = 0; i < rootMedia.length; i++) {
-
-                         if((actualViewport <= parseInt(rootMedia[i], 10)) && (actualViewport >= parseInt(rootMedia[i-1], 10))){
-                           maxRootMedia = parseFloat(rootMedia[i]);
-                           minRootMedia = parseFloat(rootMedia[i-1]);
-                           maxRootValue = parseFloat(rootValue[i]);
-                           minRootValue = parseFloat(rootValue[i-1]);
-                         }
-                       }
-
-					   var formula;
-
-                       if (minRootMedia == maxRootMedia){
-                         formula = parseInt(minRootValue, 10)
-                       } else {
-                         formula = minRootValue + (maxRootValue - minRootValue) * (actualViewport - minRootMedia)/(maxRootMedia - minRootMedia);
-                       }
-                       return formula
-
-                     }
-                   }
-                   else {
-                     console.log('LOL')
-                     // WARN
-                   }
-
-                  }
-
-
-
-                  function generate(){
-                    // Firsl value rule
-                    decl.replaceWith({ prop: decl.prop, value: interpolateArray[startFrom+1]});
-
-                    // Middle mediaquery rule
-                    for (var i = 0; i < mediaqueriesArray.length - 1; i++) {
-                      for (var i = 0; i < valuesArray.length - 1; i++) {
-                        function middleMedia(){
-                          var media = postcss.atRule({
-                            name: 'media',
-                            params: 'screen and (min-width: ' + mediaqueriesArray[i] +')'
-                          })
-
-                          media.append({selector: rule.selector}).walkRules(function(selector){
-
-                            selector.append({
-                              prop: decl.prop,
-                              value: 'calc(' + valuesArray[i] + ' + ' + (parseFloat(valuesArray[i+1]) - parseFloat(valuesArray[i])) + ' * (100' + directionViewport + ' - ' + mediaqueriesArray[i] + ') / ' +  ((parseInt(mediaqueriesArray[i+1], 10) - parseInt(mediaqueriesArray[i], 10)) / getDivider(mediaqueriesArray[i+1])) +')'
-                            });
-                          });
-
-                          // Insert middle mediaquery
-                          root.insertAfter(root.last, media)
-                        }
-
-                        middleMedia()
+                    for (var i = 0; i < rootMediaArray.length; i++) {
+                      if ((actualViewport <= parseInt(rootMediaArray[i], 10)) && (actualViewport >= parseInt(rootMediaArray[i - 1], 10))) {
+                        maxrootMediaArray = parseFloat(rootMediaArray[i]);
+                        minrootMediaArray = parseFloat(rootMediaArray[i - 1]);
+                        maxrootValueArray = parseFloat(rootValueArray[i]);
+                        minrootValueArray = parseFloat(rootValueArray[i - 1]);
                       }
                     }
 
-                    //Last mediaquery rule
-                    var lastMedia = postcss.atRule({
+                    var formula;
+
+                    if (minrootMediaArray == maxrootMediaArray) {
+                      formula = parseFloat(minrootValueArray)
+                    }
+
+                    else {
+                      formula = minrootValueArray + (maxrootValueArray - minrootValueArray) * (actualViewport - minrootMediaArray) / (maxrootMediaArray - minrootMediaArray);
+                    }
+
+                    return formula
+                  }
+                }
+
+                else {
+                  console.log('LOL')
+                  // WARN
+                }
+              }
+
+              // First @media rule
+              function firstRule(){
+                decl.replaceWith({
+                  prop: decl.prop,
+                  value: interpolateArray[startFrom + 1]
+                });
+              }
+
+              // Middle @media rule
+              function middleRule(){
+                for (var i = 0; i < mediaArray.length - 1; i++) {
+                  for (var i = 0; i < valueArray.length - 1; i++) {
+
+                    // Generate @media atrule
+                    var mediaAtrule = postcss.atRule({
                       name: 'media',
-                      params: 'screen and (min-width: ' + mediaqueriesArray[mediaqueriesArray.length - 1] +')'
+                      params: 'screen and (min-width: ' + mediaArray[i] + ')'
                     })
 
-                    lastMedia.append({selector: rule.selector}).walkRules(function(selector){
+                    var maxMedia = mediaArray[i + 1];
+                    var minMedia = mediaArray[i];
+                    var maxValue = valueArray[i + 1];
+                    var minValue = valueArray[i];
+
+                    // Append current selector with properties and values
+                    mediaAtrule.append({
+                      selector: rule.selector
+                    }).walkRules(function(selector) {
                       selector.append({
                         prop: decl.prop,
-                        value: valuesArray[valuesArray.length - 1]
+                        value: 'calc(' + minValue + ' + ' + (parseFloat(maxValue) - parseFloat(minValue)) + ' * (100' + directionViewport + ' - ' + minMedia + ') / ' + ((parseFloat(maxMedia) - parseFloat(minMedia)) / getHtmlValue(maxMedia)) + ')'
                       });
                     });
 
-                    // Insert last mediaquery
-                    root.insertAfter(root.last, lastMedia);
+                    // Insert middle mediaquery
+                    root.insertAfter(root.last, mediaAtrule)
                   }
-
-                  generate()
-
                 }
-                checkArrays()
               }
+
+              // Last @media rule
+              function lastRule() {
+
+                // Generate @media atrule
+                var lastMedia = postcss.atRule({
+                  name: 'media',
+                  params: 'screen and (min-width: ' + mediaArray[mediaArray.length - 1] + ')'
+                })
+
+                // Append current selector with properties and values
+                lastMedia.append({
+                  selector: rule.selector
+                }).walkRules(function(selector) {
+                  selector.append({
+                    prop: decl.prop,
+                    value: valueArray[valueArray.length - 1]
+                  });
+                });
+
+                // Insert last media rule
+                root.insertAfter(root.last, lastMedia);
+              }
+
+              // Get array of mediaqueries and array of values
+              generateArrays()
+
+              // Generate and insert firsl value rule
+              firstRule()
+
+              // Generate and insert middle @media rule
+              middleRule()
+
+              // Generate and insert last @media rule
+              lastRule()
             }
           }
       });
