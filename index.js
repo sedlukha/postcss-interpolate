@@ -47,9 +47,9 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
 
                   var direction = arrayForCheck[0];
 
-                  if (direction.indexOf('horizontally') > -1) {
+                  if ((direction.indexOf('horizontally') > -1) || (direction.indexOf('vw') > -1)) {
                     directionViewport = 'vw';
-                  } else if (direction.indexOf('vertically') > -1) {
+                  } else if ((direction.indexOf('vertically') > -1) || (direction.indexOf('vh') > -1)) {
                     directionViewport = 'vh';
                   } else {
                     // WARN
