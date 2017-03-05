@@ -117,7 +117,7 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
                     var minrootMediaArray, maxrootMediaArray, minrootValueArray, maxrootValueArray;
 
                     for (var i = 0; i < rootMediaArray.length; i++) {
-                      if ((actualViewport <= parseInt(rootMediaArray[i], 10)) && (actualViewport >= parseInt(rootMediaArray[i - 1], 10))) {
+                      if ((actualViewport <= parseFloat(rootMediaArray[i])) && (actualViewport >= parseFloat(rootMediaArray[i - 1]))) {
                         maxrootMediaArray = parseFloat(rootMediaArray[i]);
                         minrootMediaArray = parseFloat(rootMediaArray[i - 1]);
                         maxrootValueArray = parseFloat(rootValueArray[i]);
