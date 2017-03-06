@@ -57,14 +57,14 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
                 } else if ((direction.indexOf('vertically') > -1) || (direction.indexOf('vh') > -1)) {
                   directionViewport = 'vh';
                 } else {
-                  // WARN
+                  throw decl.error('Deprecated direction property', { word: interpolateArray[0] });
                 }
                 startFrom = 1;
               }
 
               // Syntax error
               else {
-                // WARN
+                throw decl.error('Deprecated value syntax', { word: decl.value });
               }
 
               for (var i = startFrom; i < interpolateArray.length; i += 2) {
@@ -111,7 +111,7 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
 
                   // Syntax error
                   else {
-                    // WARN
+                    throw decl.error('Deprecated value syntax', { word: decl.value });
                   }
 
                   // Get array of mediaqueries and array of values
@@ -146,8 +146,7 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
               }
 
               else {
-                console.log('LOL')
-                // WARN
+                throw decl.error('This combination of units is not supported', { word: decl.value });
               }
             }
 
@@ -225,6 +224,9 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
 
             // Generate and insert last @media rule
             lastRule()
+          }
+          else {
+            throw decl.error('Deprecated property amount', { word: decl.value });
           }
         }
     });
