@@ -35,17 +35,22 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
 
             var startFrom, directionViewport;
 
-            function checkDirection(arrayForCheck){
+            var mediaArray = [];
+            var valueArray = [];
+            const rule = decl.parent;
+            const root = rule.parent;
 
-              if (isOdd(arrayForCheck) == false && isString(arrayForCheck[0]) == false) {
+            // Generate media and values arrays
+            function generateArrays() {
+              if (isOdd(interpolateArray) == false && isString(interpolateArray[0]) == false) {
                 directionViewport = 'vw';
                 startFrom = 0
               }
 
               // With direction
-              else if (isOdd(arrayForCheck) == true && isString(arrayForCheck[0]) == true) {
+              else if (isOdd(interpolateArray) == true && isString(interpolateArray[0]) == true) {
 
-                var direction = arrayForCheck[0];
+                var direction = interpolateArray[0];
 
                 if ((direction.indexOf('horizontally') > -1) || (direction.indexOf('vw') > -1)) {
                   directionViewport = 'vw';
@@ -61,18 +66,6 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
               else {
                 // WARN
               }
-
-              return
-            }
-
-            var mediaArray = [];
-            var valueArray = [];
-            const rule = decl.parent;
-            const root = rule.parent;
-
-            // Generate media and values arrays
-            function generateArrays() {
-              checkDirection(interpolateArray)
 
               for (var i = startFrom; i < interpolateArray.length; i += 2) {
                 mediaArray.push(interpolateArray[i]);
@@ -102,14 +95,27 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
                 var rootValueArray = [];
                 var bigger = [];
                 var rootReadyArray;
+                var rootStartFrom;
 
                 if (rootString.indexOf('interpolate(') > -1) {
                   rootReadyArray = rootString.match(/\(([^)]+)\)/)[1].split(',');
 
-                  checkDirection(rootReadyArray)
+                  if (isOdd(rootReadyArray) == false && isString(rootReadyArray[0]) == false) {
+                    rootStartFrom = 0
+                  }
+
+                  // With direction
+                  else if (isOdd(rootReadyArray) == true && isString(rootReadyArray[0]) == true) {
+                    rootStartFrom = 1;
+                  }
+
+                  // Syntax error
+                  else {
+                    // WARN
+                  }
 
                   // Get array of mediaqueries and array of values
-                  for (var i = startFrom; i < rootReadyArray.length; i += 2) {
+                  for (var i = rootStartFrom; i < rootReadyArray.length; i += 2) {
                     rootMediaArray.push(rootReadyArray[i]);
                     rootValueArray.push(rootReadyArray[i + 1]);
                   }
