@@ -5,15 +5,23 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
 
       // Html font-size value
       var rootString;
+      var showError = true;
 
-      // Get 'rootString' value
-      css.walkDecls(decl => {
-        if ((decl.parent.selector.indexOf('html') > -1) &&
-          (decl.prop.indexOf('font-size') > -1)) {
-          rootString = decl.value;
-          return
+      css.walkRules(rule => {
+        if (rule.selector.indexOf('html') > -1){
+          rule.walkDecls(decl =>  {
+            if(decl.prop.indexOf('font-size') > -1){
+              rootString = decl.value;
+              showError = false
+            }
+          })
         }
-      });
+        if(showError){
+          throw rule.error('You should specify HTML font-size value');
+        }
+      })
+
+
 
       css.walkDecls(decl => {
 
