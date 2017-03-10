@@ -150,6 +150,8 @@ module.exports = postcss.plugin('postcss-interpolate', (options = {}) => {
                   }
 
                   return formula
+                } else if (rootString.indexOf('px') > -1){
+                  return parseFloat(rootString)
                 }
               }
 
