@@ -1,4 +1,4 @@
-# PostCSS-Interpolate [![Build Status][ci-img]][ci]
+# PostCSS-Interpolate
 
 [PostCSS] plugin to interpolate everything.
 
