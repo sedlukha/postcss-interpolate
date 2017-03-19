@@ -7,7 +7,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
         var rootString;
         var startFrom;
         var directionViewport;
-
+        var minDirection = 'width';
         var defaultRem = true;
         var defaultRemValue = '16px'; // default value of 1rem
 
@@ -124,6 +124,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
                     directionViewport = 'vw';
                 } else if ((direction.indexOf('vertically') > -1) || (direction.indexOf('vh') > -1)) {
                     directionViewport = 'vh';
+                    minDirection = 'height';
                 } else {
                     throw decl.error('Deprecated direction property', {
                         word: interpolateArray[0]
@@ -155,7 +156,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
                     // Generate @media atrule
                     var mediaAtrule = postcss.atRule({
                         name: 'media',
-                        params: 'screen and (min-width: ' + mediaArray[i] + ')'
+                        params: 'screen and (min-' + minDirection + ': ' + mediaArray[i] + ')'
                     });
 
                     var maxMedia = mediaArray[i + 1];
@@ -181,7 +182,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
             // Last @media rule
             var lastMedia = postcss.atRule({
                 name: 'media',
-                params: 'screen and (min-width: ' + mediaArray[mediaArray.length - 1] + ')'
+                params: 'screen and (min-' + minDirection + ': ' + mediaArray[mediaArray.length - 1] + ')'
             });
 
             // Append current selector with properties and values
