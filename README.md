@@ -1,10 +1,38 @@
 # PostCSS-Interpolate
 
-[PostCSS] plugin to interpolate everything.
+>[PostCSS] plugin to interpolate everything.
 
 [PostCSS]: https://github.com/postcss/postcss
-[ci-img]:  https://travis-ci.org/sedlukha/postcss-interpolate.svg
-[ci]:      https://travis-ci.org/sedlukha/postcss-interpolate
+[draft]: https://github.com/w3c/csswg-drafts/issues/581
+
+This plugin made for automatically interpolation of property values between breakpoints.
+
+Inspired by this [draft]
+
+## Installation
+
+```
+$ npm i --save-dev postcss-interpolate
+```
+
+## Syntax
+
+####`interpolate(direction, mediaquery-1, value-1, ... mediaquery-n, value-n)`
+
+* #####`direction`
+
+  * _none_ — if you will not specify direction, plugin will you `vertically` as defaul direction
+  * _`vertically`_ or _`vw`_ — default derection.
+  * _`horizontally`_ or _`vh`_
+
+* #####`mediaquery`
+  works only with **px** units
+
+* #####`value`
+  works only with **px** or **rem** units
+
+
+## Examples
 
 ```css
 /* Input */
@@ -46,4 +74,13 @@
 postcss([ require('postcss-interpolate') ])
 ```
 
-See [PostCSS] docs for examples for your environment.
+If you are using **postcss-cssnext**, please, turn off pxrem plugin
+```js
+postcssInterpolate(),
+postcssCssnext({
+  features: {
+    rem: false,
+    autoprefixer: {browsers: ['last 2 versions'] }
+  }
+})
+```
