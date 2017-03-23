@@ -7,7 +7,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
         var rootString;
         var startFrom;
         var directionViewport;
-        var minDirection = 'width';
+        var minDirection;
         var defaultRem = true;
         var defaultRemValue = '16px'; // default value of 1rem
 
@@ -116,12 +116,14 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
 
             if (!isOdd(interpolateArray) && !isString(interpolateArray[0])) {
                 directionViewport = 'vw';
+                minDirection = 'width';
                 startFrom = 0;
             } else if (isOdd(interpolateArray) && isString(interpolateArray[0])) {
                 var direction = interpolateArray[0];
 
                 if ((direction.indexOf('horizontally') > -1) || (direction.indexOf('vw') > -1)) {
                     directionViewport = 'vw';
+                    minDirection = 'width';
                 } else if ((direction.indexOf('vertically') > -1) || (direction.indexOf('vh') > -1)) {
                     directionViewport = 'vh';
                     minDirection = 'height';
