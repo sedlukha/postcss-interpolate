@@ -1,0 +1,23 @@
+.foo {
+  font-size:  10px;
+}
+@media screen and (min-width: 320px) {
+  .foo {
+    font-size: calc( 10px + 5 * (100vw - 320px) / 280);
+  }
+}
+@media screen and (min-width:  600px) {
+  .foo {
+    font-size: calc( 15px + 25 * (100vw -  600px) / 600);
+  }
+}
+@media screen and (min-width:  1200px) {
+  .foo {
+    font-size:  40px;
+  }
+}
+
+
+.foo {
+  margin: 0;
+}

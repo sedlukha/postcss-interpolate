@@ -1,0 +1,24 @@
+.foo {
+  padding-top:  10px;
+  padding-bottom:  20px;
+}
+@media screen and (min-width: 320px) {
+  .foo {
+    padding-top: calc( 10px + 30 * (100vw - 320px) / 880);
+  }
+}
+@media screen and (min-width:  1200px) {
+  .foo {
+    padding-top:  40px;
+  }
+}
+@media screen and (min-width: 320px) {
+  .foo {
+    padding-bottom: calc( 20px + 30 * (100vw - 320px) / 880);
+  }
+}
+@media screen and (min-width:  1200px) {
+  .foo {
+    padding-bottom:  50px;
+  }
+}

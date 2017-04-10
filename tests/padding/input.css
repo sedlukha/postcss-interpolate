@@ -1,0 +1,4 @@
+.foo {
+  padding-top: interpolate(320px, 10px, 1200px, 40px);
+  padding-bottom: interpolate(320px, 20px, 1200px, 50px);
+}
