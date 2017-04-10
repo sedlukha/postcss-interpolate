@@ -45,7 +45,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
         function getHtmlValue(actualViewport, mediaArray, valueArray, decl) {
             actualViewport = parseFloat(actualViewport);
 
-            if (mediaArray.every(isPx) && valueArray.every(isPx)) {
+            if ((mediaArray.every(isPx) && valueArray.every(isPx)) || ((mediaArray.every(isPx) && !valueArray.every(isString))) ) {
                 return 1;
             } else if (mediaArray.every(isPx) && valueArray.every(isRem)) {
                 var rootMediaArray = [];
@@ -99,7 +99,8 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
                 } else if (rootString.indexOf('px') > -1) {
                     return parseFloat(rootString);
                 }
-            } else {
+            }
+            else {
                 throw decl.error(
                     'This combination of units is not supported', {
                         word: decl.value
