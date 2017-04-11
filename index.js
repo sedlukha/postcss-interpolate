@@ -45,7 +45,7 @@ module.exports = postcss.plugin('postcss-interpolate', () => {
         function getHtmlValue(actualViewport, mediaArray, valueArray, decl) {
             actualViewport = parseFloat(actualViewport);
 
-            if ((mediaArray.every(isPx) && valueArray.every(isPx)) || ((mediaArray.every(isPx) && !valueArray.every(isString))) ) {
+            if ((mediaArray.every(isPx) && valueArray.every(isPx)) ) {
                 return 1;
             } else if (mediaArray.every(isPx) && valueArray.every(isRem)) {
                 var rootMediaArray = [];

@@ -1,3 +1,0 @@
-.foo {
-  line-height: interpolate(320px, 2, 1200px, 5);
-}
