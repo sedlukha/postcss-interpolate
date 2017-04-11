@@ -4,8 +4,9 @@
 
 [PostCSS]: https://github.com/postcss/postcss
 
-This plugin made for automatically interpolation of property values between breakpoints.
-You can use this plugin for any __px/rem__ value interpolation (font-size, padding, margin and other). It __doesn't__ work with __%__ and __em__.
+This plugin made for automatically interpolation of property values between breakpoints. You can specify as much breakpoints, as you need.
+
+Use this plugin for any __px/rem__ value interpolation (font-size, padding, margin and other). It __doesn't__ work with __%__ and __em__.
 
 ![](https://media.giphy.com/media/3og0IQyIEtGJYrCPNm/giphy.gif)
 
@@ -37,33 +38,62 @@ $ npm i --save-dev postcss-interpolate
 
 
 ## Examples
-More examples at the tests folder
+More examples at the tests folder.
+
+![](https://media.giphy.com/media/3og0IOnvXx4GLSkG40/giphy.gif)
 ```css
 /* Input */
 .foo {
-  font-size: interpolate(320px, 30px, 600px, 40px, 1200px, 50px);
+  font-size: interpolate(320px, 10px, 600px, 40px, 1200px, 10px);
 }
 
 /* Output */
 .foo {
-  font-size:  30px;
+  font-size:  10px;
 }
-
 @media screen and (min-width: 320px) {
   .foo {
-    font-size: calc( 30px + 10 * (100vw - 320px) / 280);
+    font-size: calc( 10px + 30 * (100vw - 320px) / 280);
   }
 }
-
 @media screen and (min-width:  600px) {
   .foo {
-    font-size: calc( 40px + 10 * (100vw -  600px) / 600);
+    font-size: calc( 40px + -30 * (100vw -  600px) / 600);
   }
 }
-
 @media screen and (min-width:  1200px) {
   .foo {
-    font-size:  50px;
+    font-size:  10px;
+  }
+}
+```
+
+Padding example
+
+![](https://media.giphy.com/media/3og0IKBuh7cKgaOxc4/giphy.gif)
+```css
+/* Input */
+.foo {
+  padding-top: interpolate(320px, 5px, 600px, 80px, 1200px, 5px);
+}
+
+/* Output */
+.foo {
+  padding-top:  5px;
+}
+@media screen and (min-width: 320px) {
+  .foo {
+    padding-top: calc( 5px + 75 * (100vw - 320px) / 280);
+  }
+}
+@media screen and (min-width:  600px) {
+  .foo {
+    padding-top: calc( 80px + -75 * (100vw -  600px) / 600);
+  }
+}
+@media screen and (min-width:  1200px) {
+  .foo {
+    padding-top:  5px;
   }
 }
 ```
