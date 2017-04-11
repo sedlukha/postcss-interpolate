@@ -5,7 +5,7 @@
 [PostCSS]: https://github.com/postcss/postcss
 
 This plugin made for automatically interpolation of property values between breakpoints.
-You can use this plugin for any __px/rem__ value interpolation (font-size, padding, margin and other).
+You can use this plugin for any __px/rem__ value interpolation (font-size, padding, margin and other). It __doesn't__ work with __%__ and __em__.
 
 ![](https://media.giphy.com/media/3og0IQyIEtGJYrCPNm/giphy.gif)
 
