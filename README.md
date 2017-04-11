@@ -23,16 +23,16 @@ $ npm i --save-dev postcss-interpolate
 
 `interpolate(direction, mediaquery-1, value-1, ... mediaquery-n, value-n)`
 
-*  `direction`
+`direction`
   * __none__ — if you will not specify direction, plugin will you __vertically__ as defaul direction
   * __vertically__ or __vw__ — default derection.
   * __horizontally__ or __vh__
 
 
-* `mediaquery`
+`mediaquery`
   works only with **px** units
 
-* `value`
+`value`
   works only with **px** or **rem** units
 
 
